@@ -49,6 +49,7 @@ func (c *Cacher) Delete(key string) {
 
 func (c *Cacher) purge(ttl time.Duration) {
 	for {
+		time.Sleep(ttl)
 		ts := time.Now().Add(ttl).Unix()
 		c.mux.Lock()
 		for key, ci := range c.data {
@@ -57,7 +58,6 @@ func (c *Cacher) purge(ttl time.Duration) {
 			}
 		}
 		c.mux.Unlock()
-		time.Sleep(ttl)
 	}
 }
 
