@@ -76,11 +76,10 @@ func (ci *cacheItem) call() (data interface{}, err error) {
 	ts := time.Now().Unix()
 	ci.Lock()
 	if ci.expiresAt == 0 || ci.expiresAt < ts {
-		data, err = ci.fn()
+		ci.data, ci.err = ci.fn()
 		ci.expiresAt = ts + ci.ttl
-	} else {
-		data, err = ci.data, ci.err
 	}
+	data, err = ci.data, ci.err
 	ci.Unlock()
 	return
 }
