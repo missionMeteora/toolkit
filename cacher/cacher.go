@@ -50,10 +50,10 @@ func (c *Cacher) Delete(key string) {
 func (c *Cacher) purge(ttl time.Duration) {
 	for {
 		time.Sleep(ttl)
-		ts := time.Now().Add(ttl).Unix()
+		ts := time.Now().Unix()
 		c.mux.Lock()
 		for key, ci := range c.data {
-			if ci.expiresAt > ts {
+			if ci.expiresAt < ts {
 				delete(c.data, key)
 			}
 		}
