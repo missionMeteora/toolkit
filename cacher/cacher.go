@@ -32,7 +32,7 @@ func (c *Cacher) Get(key string, fn CacheFiller, ttl time.Duration) (data interf
 	if ci = c.data[key]; ci == nil {
 		ci = &cacheItem{
 			fn:  fn,
-			ttl: int64(ttl),
+			ttl: int64(ttl / time.Second),
 		}
 		c.data[key] = ci
 	}
@@ -49,7 +49,7 @@ func (c *Cacher) Delete(key string) {
 
 func (c *Cacher) purge(ttl time.Duration) {
 	for {
-		ts := time.Now().Add(ttl).UnixNano()
+		ts := time.Now().Add(ttl).Unix()
 		c.mux.Lock()
 		for key, ci := range c.data {
 			if ci.expiresAt > ts {
@@ -73,7 +73,7 @@ type cacheItem struct {
 }
 
 func (ci *cacheItem) call() (data interface{}, err error) {
-	ts := time.Now().UnixNano()
+	ts := time.Now().Unix()
 	ci.Lock()
 	if ci.expiresAt == 0 || ci.expiresAt < ts {
 		data, err = ci.fn()
