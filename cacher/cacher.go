@@ -53,7 +53,7 @@ func (c *Cacher) purge(ttl time.Duration) {
 		ts := time.Now().Unix()
 		c.mux.Lock()
 		for key, ci := range c.data {
-			if ci.expiresAt < ts {
+			if ci.HasExpired(ts) {
 				delete(c.data, key)
 			}
 		}
@@ -80,6 +80,13 @@ func (ci *cacheItem) Value() (data interface{}, err error) {
 		ci.expiresAt = ts + ci.ttl
 	}
 	data, err = ci.data, ci.err
+	ci.Unlock()
+	return
+}
+
+func (ci *cacheItem) HasExpired(nowTS int64) (b bool) {
+	ci.Lock()
+	b = ci.expiresAt > 0 && ci.expiresAt < nowTS
 	ci.Unlock()
 	return
 }
