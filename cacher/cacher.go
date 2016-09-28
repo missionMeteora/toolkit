@@ -38,7 +38,7 @@ func (c *Cacher) Get(key string, fn CacheFiller, ttl time.Duration) (data interf
 	}
 	c.mux.Unlock()
 
-	return ci.call()
+	return ci.Value()
 }
 
 func (c *Cacher) Delete(key string) {
@@ -72,7 +72,7 @@ type cacheItem struct {
 	sync.Mutex
 }
 
-func (ci *cacheItem) call() (data interface{}, err error) {
+func (ci *cacheItem) Value() (data interface{}, err error) {
 	ts := time.Now().Unix()
 	ci.Lock()
 	if ci.expiresAt == 0 || ci.expiresAt < ts {
