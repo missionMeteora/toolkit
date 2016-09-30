@@ -47,6 +47,16 @@ func (c *Cacher) Delete(key string) {
 	c.mux.Unlock()
 }
 
+func (c *Cacher) DeleteFn(fn func(key string) bool) {
+	c.mux.Lock()
+	for key := range c.data {
+		if fn(key) {
+			delete(c.data, key)
+		}
+	}
+	c.mux.Unlock()
+}
+
 func (c *Cacher) purge(ttl time.Duration) {
 	for {
 		time.Sleep(ttl)
