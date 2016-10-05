@@ -1,5 +1,6 @@
 package errors
 
+// ErrorList is used to chain a list of potential errors
 type ErrorList []error
 
 // Error is the error interface implementation
