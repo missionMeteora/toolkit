@@ -2,6 +2,11 @@ package errors
 
 import "fmt"
 
+const (
+	// ErrIsClosed is intended to be used when an action is attempted on a closed instance
+	ErrIsClosed = Error("cannot perform action on a closed instance")
+)
+
 // Error is a constant error type
 type Error string
 
