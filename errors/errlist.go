@@ -54,3 +54,13 @@ func (e *ErrorList) Push(err error) {
 	e.errs = append(e.errs, err)
 	e.mux.Unlock()
 }
+
+// Len will return the length of the inner errors list
+func (e *ErrorList) Len() (n int) {
+	e.mux.RLock()
+	if e != nil {
+		n = len(e.errs)
+	}
+	e.mux.RUnlock()
+	return
+}
