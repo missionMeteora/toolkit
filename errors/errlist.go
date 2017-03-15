@@ -55,6 +55,15 @@ func (e *ErrorList) Push(err error) {
 	e.mux.Unlock()
 }
 
+// ForEach will iterate through all of the errors within the error list
+func (e *ErrorList) ForEach(fn func(error)) {
+	e.mux.RLock()
+	for _, err := range e.errs {
+		fn(err)
+	}
+	e.mux.RUnlock()
+}
+
 // Len will return the length of the inner errors list
 func (e *ErrorList) Len() (n int) {
 	e.mux.RLock()
