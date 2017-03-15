@@ -10,13 +10,13 @@ type ErrorList struct {
 
 // Error will return the string-form of the errors
 func (e *ErrorList) Error() (str string) {
+	var b []byte
 	e.mux.RLock()
 	if e == nil || len(e.errs) == 0 {
 		goto END
 	}
 
-	b := []byte("the following errors occured:\n")
-
+	b = []byte("the following errors occured:\n")
 	for _, err := range e.errs {
 		b = append(b, err.Error()...)
 		b = append(b, '\n')
