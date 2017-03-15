@@ -9,21 +9,24 @@ type ErrorList struct {
 }
 
 // Error will return the string-form of the errors
-func (e *ErrorList) Error() string {
+func (e *ErrorList) Error() (str string) {
+	e.mux.RLock()
 	if e == nil || len(e.errs) == 0 {
-		return ""
+		goto END
 	}
 
 	b := []byte("the following errors occured:\n")
 
-	e.mux.RLock()
 	for _, err := range e.errs {
 		b = append(b, err.Error()...)
 		b = append(b, '\n')
 	}
-	e.mux.RUnlock()
 
-	return string(b)
+	str = string(b)
+
+END:
+	e.mux.RUnlock()
+	return
 }
 
 // Err will return an error if the errorlist is not empty
