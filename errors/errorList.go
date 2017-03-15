@@ -11,7 +11,7 @@ type ErrorList struct {
 // Error will return the string-form of the errors
 func (e *ErrorList) Error() string {
 	if e == nil {
-		return
+		return ""
 	}
 
 	e.mux.RLock()
