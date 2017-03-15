@@ -22,7 +22,7 @@ func (e *ErrorList) Error() string {
 	}
 
 	if len(e.errs) == 1 {
-		return e.errs[0]
+		return e.errs[0].Error()
 	}
 
 	b := []byte("the following errors occured:\n")
@@ -31,7 +31,7 @@ func (e *ErrorList) Error() string {
 		b = append(b, '\n')
 	}
 
-	return Error(b)
+	return string(b)
 }
 
 // Err will return an error if the errorlist is not empty
