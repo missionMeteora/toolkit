@@ -16,6 +16,11 @@ func (e *ErrorList) Error() (str string) {
 		goto END
 	}
 
+	if len(e.errs) == 1 {
+		str = e.errs[0].Error()
+		goto END
+	}
+
 	b = []byte("the following errors occured:\n")
 	for _, err := range e.errs {
 		b = append(b, err.Error()...)
