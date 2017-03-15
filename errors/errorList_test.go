@@ -20,10 +20,4 @@ func TestErrorList(t *testing.T) {
 			t.Fatal("invalid error")
 		}
 	})
-
-	testErrorlistInterface(errs)
-}
-
-func testErrorlistInterface(err error) {
-	return
 }

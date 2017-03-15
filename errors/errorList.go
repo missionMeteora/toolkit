@@ -9,8 +9,14 @@ type ErrorList struct {
 }
 
 // Error will return the string-form of the errors
-// Note - This is not thread-safe, please run AFTER all pushes are complete
-func (e ErrorList) Error() string {
+func (e *ErrorList) Error() string {
+	if e == nil {
+		return
+	}
+
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+
 	if len(e.errs) == 0 {
 		return ""
 	}
