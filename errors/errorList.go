@@ -9,14 +9,20 @@ type ErrorList struct {
 }
 
 // Error will return the string-form of the errors
-// Note - This is not thread-safe, please run AFTER all pushes are complete
-func (e ErrorList) Error() string {
+func (e *ErrorList) Error() string {
+	if e == nil {
+		return ""
+	}
+
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+
 	if len(e.errs) == 0 {
 		return ""
 	}
 
 	if len(e.errs) == 1 {
-		return e.errs[0].Error()
+		return e.errs[0]
 	}
 
 	b := []byte("the following errors occured:\n")
@@ -25,7 +31,7 @@ func (e ErrorList) Error() string {
 		b = append(b, '\n')
 	}
 
-	return string(b)
+	return Error(b)
 }
 
 // Err will return an error if the errorlist is not empty
