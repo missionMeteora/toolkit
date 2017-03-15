@@ -1,54 +1,54 @@
 package errors
 
-// ErrorList is used to chain a list of potential errors
-type ErrorList []error
+import "sync"
 
-// Error is the error interface implementation
-func (e ErrorList) Error() string {
-	if len(e) == 0 {
+// ErrorList is used to chain a list of potential errors
+type ErrorList struct {
+	mux  sync.RWMutex
+	errs []error
+}
+
+// Error will return the string-form of the errors
+func (e *ErrorList) Error() string {
+	if e == nil || len(e.errs) == 0 {
 		return ""
 	}
 
 	b := []byte("the following errors occured:\n")
-	for _, err := range e {
+
+	e.mux.RLock()
+	for _, err := range e.errs {
 		b = append(b, err.Error()...)
 		b = append(b, '\n')
 	}
+	e.mux.RUnlock()
 
 	return string(b)
 }
 
-// Append appends an error to the error list
-func (e ErrorList) Append(err error) ErrorList {
-	if err == nil {
-		return e
+// Err will return an error if the errorlist is not empty
+// If the errorlist is empty - nil is returned
+func (e *ErrorList) Err() (err error) {
+	e.mux.RLock()
+	if e != nil && len(e.errs) > 0 {
+		err = e
 	}
-
-	if oe, ok := err.(ErrorList); ok {
-		return append(e, oe...)
-	}
-	return append(e, err)
+	e.mux.RLock()
+	return
 }
 
-// Push adds the error to the list if it is not nil
+// Push will push an error to the errorlist
+// If the errorlist is nil, it will be created
 func (e *ErrorList) Push(err error) {
-	if e == nil || err == nil {
+	if err == nil {
 		return
 	}
-	switch err := err.(type) {
-	case ErrorList:
-		*e = append(*e, err...)
-	case *ErrorList:
-		*e = append(*e, *err...)
-	default:
-		*e = append(*e, err)
-	}
-}
 
-// Err returns error value of ErrorList
-func (e ErrorList) Err() error {
-	if len(e) == 0 {
-		return nil
+	e.mux.Lock()
+	if e == nil {
+		*e = ErrorList{}
 	}
-	return e
+
+	e.errs = append(e.errs, err)
+	e.mux.Unlock()
 }
