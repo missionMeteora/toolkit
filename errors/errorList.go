@@ -37,8 +37,15 @@ func (e *ErrorList) Error() string {
 // Err will return an error if the errorlist is not empty
 // If the errorlist is empty - nil is returned
 func (e *ErrorList) Err() (err error) {
+	if e == nil {
+		return
+	}
 	e.mux.RLock()
-	if e != nil && len(e.errs) > 0 {
+	switch len(e.errs) {
+	case 0: // do nothing
+	case 1:
+		err = e.errs[0]
+	default:
 		err = e
 	}
 	e.mux.RLock()
@@ -51,18 +58,20 @@ func (e *ErrorList) Push(err error) {
 	if err == nil {
 		return
 	}
-
-	e.mux.Lock()
 	if e == nil {
 		*e = ErrorList{}
 	}
 
+	e.mux.Lock()
 	e.errs = append(e.errs, err)
 	e.mux.Unlock()
 }
 
 // ForEach will iterate through all of the errors within the error list
 func (e *ErrorList) ForEach(fn func(error)) {
+	if e == nil {
+		return
+	}
 	e.mux.RLock()
 	for _, err := range e.errs {
 		fn(err)
@@ -72,10 +81,11 @@ func (e *ErrorList) ForEach(fn func(error)) {
 
 // Len will return the length of the inner errors list
 func (e *ErrorList) Len() (n int) {
-	e.mux.RLock()
-	if e != nil {
-		n = len(e.errs)
+	if e == nil {
+		return
 	}
+	e.mux.RLock()
+	n = len(e.errs)
 	e.mux.RUnlock()
 	return
 }
