@@ -2,13 +2,14 @@ package errors
 
 import "sync"
 
-// ErrorList is used to chain a list of potential errors
+// ErrorList is used to chain a list of potential errors and is thread-safe.
 type ErrorList struct {
 	mux  sync.RWMutex
 	errs []error
 }
 
-// Error will return the string-form of the errors
+// Error will return the string-form of the errors.
+// Implements the error interface.
 func (e *ErrorList) Error() string {
 	if e == nil {
 		return ""
@@ -34,8 +35,9 @@ func (e *ErrorList) Error() string {
 	return string(b)
 }
 
-// Err will return an error if the errorlist is not empty
-// If the errorlist is empty - nil is returned
+// Err will return an error if the errorlist is not empty.
+// If there's only 1 error, it will be directly returned.
+// If the errorlist is empty - nil is returned.
 func (e *ErrorList) Err() (err error) {
 	if e == nil {
 		return
@@ -53,25 +55,35 @@ func (e *ErrorList) Err() (err error) {
 }
 
 // Push will push an error to the errorlist
-// If the errorlist is nil, it will be created
+// If err is a errorlist, it will be merged.
+// If the errorlist is nil, it will be created.
 func (e *ErrorList) Push(err error) {
 	if err == nil {
 		return
 	}
+
 	if e == nil {
 		*e = ErrorList{}
 	}
 
 	e.mux.Lock()
-	e.errs = append(e.errs, err)
+	switch v := err.(type) {
+	case *ErrorList:
+		v.ForEach(func(err error) {
+			e.errs = append(e.errs, err)
+		})
+	default:
+		e.errs = append(e.errs, err)
+	}
 	e.mux.Unlock()
 }
 
-// ForEach will iterate through all of the errors within the error list
+// ForEach will iterate through all of the errors within the error list.
 func (e *ErrorList) ForEach(fn func(error)) {
 	if e == nil {
 		return
 	}
+
 	e.mux.RLock()
 	for _, err := range e.errs {
 		fn(err)
@@ -79,11 +91,12 @@ func (e *ErrorList) ForEach(fn func(error)) {
 	e.mux.RUnlock()
 }
 
-// Len will return the length of the inner errors list
+// Len will return the length of the inner errors list.
 func (e *ErrorList) Len() (n int) {
 	if e == nil {
 		return
 	}
+
 	e.mux.RLock()
 	n = len(e.errs)
 	e.mux.RUnlock()
