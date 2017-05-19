@@ -154,8 +154,9 @@ func (w *Writer) Write(in []byte) (n int, err error) {
 		return
 	}
 
-	w.enc.XORKeyStream(in, in)
-	return w.wtr.Write(in)
+	out := make([]byte, len(in))
+	w.enc.XORKeyStream(out, in)
+	return w.wtr.Write(out)
 }
 
 // Close will close a particular instance of Writer
