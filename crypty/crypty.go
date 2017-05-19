@@ -154,7 +154,7 @@ func (w *Writer) Write(in []byte) (n int, err error) {
 		return
 	}
 
-	out = make([]byte, len(in))
+	out := make([]byte, len(in))
 	w.enc.XORKeyStream(out, in)
 	return w.wtr.Write(out)
 }
