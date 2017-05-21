@@ -91,6 +91,21 @@ func (e *ErrorList) ForEach(fn func(error)) {
 	e.mux.RUnlock()
 }
 
+// Copy will copy the items from the inbound error list to the source
+func (e *ErrorList) Copy(in *ErrorList) {
+	if in == nil {
+		return
+	}
+
+	e.mux.Lock()
+	defer e.mux.Unlock()
+
+	in.mux.RLock()
+	defer in.mux.RUnlock()
+
+	e.errs = append(e.errs, in.errs...)
+}
+
 // Len will return the length of the inner errors list.
 func (e *ErrorList) Len() (n int) {
 	if e == nil {
