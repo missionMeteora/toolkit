@@ -24,12 +24,11 @@ func (b *Bool) Get() (state bool) {
 	return atomic.LoadInt32(b.getIntPtr()) == True
 }
 
-// True will set to true
-func (b *Bool) True() (changed bool) {
-	return atomic.CompareAndSwapInt32(b.getIntPtr(), False, True)
-}
+// Set will set the state
+func (b *Bool) Set(state bool) (changed bool) {
+	if state {
+		return atomic.CompareAndSwapInt32(b.getIntPtr(), False, True)
+	}
 
-// False will set to false
-func (b *Bool) False() (changed bool) {
 	return atomic.CompareAndSwapInt32(b.getIntPtr(), True, False)
 }

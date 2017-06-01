@@ -8,7 +8,7 @@ func TestAtomicBool(t *testing.T) {
 		t.Fatal("invalid state")
 	}
 
-	if !b.True() {
+	if !b.Set(true) {
 		t.Fatal("state change not triggered")
 	}
 
@@ -16,11 +16,11 @@ func TestAtomicBool(t *testing.T) {
 		t.Fatal("invalid state")
 	}
 
-	if b.True() {
+	if b.Set(true) {
 		t.Fatal("state change triggered when it shouldn't have")
 	}
 
-	if !b.False() {
+	if !b.Set(false) {
 		t.Fatal("state change not triggered")
 	}
 
