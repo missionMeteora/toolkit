@@ -67,10 +67,6 @@ func (e *ErrorList) Push(err error) {
 
 	switch v := err.(type) {
 	case *ErrorList:
-		if v == nil {
-			return
-		}
-
 		v.ForEach(func(err error) {
 			e.errs = append(e.errs, err)
 		})
