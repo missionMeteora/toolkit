@@ -1,7 +1,6 @@
 package errors
 
 import "sync"
-import "github.com/missionMeteora/journaler"
 
 // ErrorList is used to chain a list of potential errors and is thread-safe.
 type ErrorList struct {
@@ -51,7 +50,7 @@ func (e *ErrorList) Err() (err error) {
 	default:
 		err = e
 	}
-	e.mux.RLock()
+	e.mux.RUnlock()
 	return
 }
 
@@ -59,27 +58,26 @@ func (e *ErrorList) Err() (err error) {
 // If err is a errorlist, it will be merged.
 // If the errorlist is nil, it will be created.
 func (e *ErrorList) Push(err error) {
-
-	journaler.Debug("", err == nil, err)
-
 	if err == nil {
 		return
 	}
 
 	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	switch v := err.(type) {
 	case *ErrorList:
-		journaler.Debug("IS ERRORLIST: %v", v)
+		if v == nil {
+			return
+		}
 
 		v.ForEach(func(err error) {
 			e.errs = append(e.errs, err)
 		})
-	case nil:
-		journaler.Debug("Nil??")
+
 	default:
 		e.errs = append(e.errs, err)
 	}
-	e.mux.Unlock()
 }
 
 // ForEach will iterate through all of the errors within the error list.
