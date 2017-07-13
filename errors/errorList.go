@@ -50,7 +50,7 @@ func (e *ErrorList) Err() (err error) {
 	default:
 		err = e
 	}
-	e.mux.RLock()
+	e.mux.RUnlock()
 	return
 }
 
@@ -62,20 +62,18 @@ func (e *ErrorList) Push(err error) {
 		return
 	}
 
-	if e == nil {
-		*e = ErrorList{}
-	}
-
 	e.mux.Lock()
+	defer e.mux.Unlock()
+
 	switch v := err.(type) {
 	case *ErrorList:
 		v.ForEach(func(err error) {
 			e.errs = append(e.errs, err)
 		})
+
 	default:
 		e.errs = append(e.errs, err)
 	}
-	e.mux.Unlock()
 }
 
 // ForEach will iterate through all of the errors within the error list.
